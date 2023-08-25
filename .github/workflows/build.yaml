@@ -1,0 +1,62 @@
+name: Build GH action
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    name: Build and publish
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.0'
+
+      - run: go version
+
+      - name: Build
+        run: |
+          env GOOS=linux GOARCH=amd64 go build -o build/linux
+          env GOOS=darwin GOARCH=amd64 go build -o build/macos
+          env GOOS=windows GOARCH=amd64 go build -o build/windows
+
+      - name: Find version
+        id: version
+        run: |
+          LAST_TAG=$(git --no-pager describe --always --dirty)
+          
+          NEXT_VERSION="$(npx semver "$LAST_TAG" -i patch -c)"
+          
+          echo "RELEASE_VERSION=${NEXT_VERSION}" >> $GITHUB_ENV
+
+      - name: Release commit
+        run: |
+          git config --global user.email "${{ github.event.pusher.email }}"
+          git config --global user.name "${{ github.event.pusher.name }}"
+          git add .
+          git commit -m ':bookmark: ${{ env.RELEASE_VERSION }}'
+          git tag -a '${{ env.RELEASE_VERSION }}' -m ':bookmark: ${{ env.RELEASE_VERSION }}'
+          git push origin --tags
+
+      - name: Create release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              const response = await github.rest.repos.createRelease({
+                draft: false,
+                generate_release_notes: true,
+                name: process.env.RELEASE_VERSION,
+                owner: context.repo.owner,
+                prerelease: false,
+                repo: context.repo.repo,
+                tag_name: process.env.RELEASE_VERSION,
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }
