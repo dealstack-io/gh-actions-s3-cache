@@ -43,11 +43,12 @@ jobs:
           git add .
           git commit -m ':bookmark: ${{ env.RELEASE_VERSION }}'
           git tag -a '${{ env.RELEASE_VERSION }}' -m ':bookmark: ${{ env.RELEASE_VERSION }}'
-          git push origin --tags
           
           MAJOR_TAG=$(echo "${{ env.RELEASE_VERSION }}" | sed "s/\..*//")
-          git tag -a '$MAJOR_TAG' -f -m ':rocket: Update version tag $MAJOR_TAG'
-          git push origin tag $MAJOR_TAG -f
+          git tag -a "$MAJOR_TAG" -f -m ":rocket: Update version tag $MAJOR_TAG"
+#          git push origin tag "$MAJOR_TAG" -f
+          
+          git push origin --tags -f
 
       - name: Create release
         uses: actions/github-script@v6
