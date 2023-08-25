@@ -46,7 +46,7 @@ jobs:
           git push origin --tags
           
           MAJOR_TAG=$(echo "${{ env.RELEASE_VERSION }}" | sed "s/\..*//")
-          git tag -a '$MAJOR_TAG' -f -a -m ':rocket: Update version tag $MAJOR_TAG'
+          git tag -a '$MAJOR_TAG' -f -m ':rocket: Update version tag $MAJOR_TAG'
           git push origin tag $MAJOR_TAG -f
 
       - name: Create release
