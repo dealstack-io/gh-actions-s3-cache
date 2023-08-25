@@ -28,9 +28,9 @@ jobs:
       - name: Find version
         id: version
         run: |
-          LAST_TAG=$(git --no-pager describe --always --dirty)
+          LAST_TAG=$(git for-each-ref "refs/tags/v*" --sort=-committerdate:relative --format='%(refname)' --count=1 | sed "s/refs\/tags\///" )
           
-          NEXT_VERSION="$(npx semver "$LAST_TAG" -i patch -c)"
+          NEXT_VERSION="v$(npx semver "$LAST_TAG" -i patch -c)"
           
           echo "RELEASE_VERSION=${NEXT_VERSION}" >> $GITHUB_ENV
 
