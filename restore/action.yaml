@@ -31,7 +31,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - run: $GITHUB_ACTION_PATH/restore/entrypoint.sh
+    - run: $GITHUB_ACTION_PATH/entrypoint.sh
       shell: bash
       env:
         OS: ${{ runner.os }}
@@ -43,7 +43,7 @@ runs:
         FAIL_ON_CACHE_MISS: ${{ inputs.fail-on-cache-miss }}
     - id: cache-hit
       run: |
-        CACHE_HIT="$($GITHUB_ACTION_PATH/restore/check-cache-hit.sh ${{ inputs.key }})"
+        CACHE_HIT="$($GITHUB_ACTION_PATH/check-cache-hit.sh ${{ inputs.key }})"
         
         echo "hit=${CACHE_HIT}" >> $GITHUB_OUTPUT
       shell: bash
