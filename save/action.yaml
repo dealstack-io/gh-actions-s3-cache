@@ -11,6 +11,18 @@ inputs:
   key:
     description: "An explicit key for restoring the cache"
     required: true
+  aws-access-key-id:
+    description: "AWS Access Key Id"
+    required: true
+  aws-secret-access-key:
+    description: "AWS Secret Access Key"
+    required: true
+  aws-region:
+    description: "AWS Region"
+    required: true
+  aws-bucket:
+    description: "AWS Bucket"
+    required: true
 runs:
   using: composite
   steps:

@@ -5,9 +5,6 @@ branding:
   icon: archive
   color: gray-dark
 inputs:
-  paths:
-    description: "A list of files, directories, and wildcard patterns to restore"
-    required: true
   key:
     description: "An explicit key for restoring the cache"
     required: true
@@ -15,6 +12,18 @@ inputs:
     description: "Fail the workflow if cache entry is not found"
     default: "false"
     required: false
+  aws-access-key-id:
+    description: "AWS Access Key Id"
+    required: true
+  aws-secret-access-key:
+    description: "AWS Secret Access Key"
+    required: true
+  aws-region:
+    description: "AWS Region"
+    required: true
+  aws-bucket:
+    description: "AWS Bucket"
+    required: true
 outputs:
   cache-hit:
     description: "A boolean value to indicate if cache entry was found and downloaded"
@@ -26,7 +35,6 @@ runs:
       shell: bash
       env:
         OS: ${{ runner.os }}
-        PATHS: ${{ inputs.paths }}
         AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
         AWS_REGION: ${{ inputs.aws-region }}
