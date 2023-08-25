@@ -1,0 +1,26 @@
+name: "Save cache"
+description: "GitHub Action for saving files to S3"
+author: Dealstack
+branding:
+  icon: archive
+  color: gray-dark
+inputs:
+  paths:
+    description: "A list of files, directories, and wildcard patterns to restore"
+    required: true
+  key:
+    description: "An explicit key for restoring the cache"
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: $GITHUB_ACTION_PATH/save/entrypoint.sh
+      shell: bash
+      env:
+        OS: ${{ runner.os }}
+        PATHS: ${{ inputs.paths }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        AWS_REGION: ${{ inputs.aws-region }}
+        AWS_BUCKET: ${{ inputs.aws-bucket }}
+        KEY: ${{ inputs.key }}

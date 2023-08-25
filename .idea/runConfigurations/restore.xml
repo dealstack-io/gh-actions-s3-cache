@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="restore" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="gh-actions-s3-cache" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="restore" />
+    <kind value="PACKAGE" />
+    <package value="gh-actions-s3-cache" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,0 +1,34 @@
+name: "Restore cache"
+description: "GitHub Action for restoring files from S3"
+author: Dealstack
+branding:
+  icon: archive
+  color: gray-dark
+inputs:
+  paths:
+    description: "A list of files, directories, and wildcard patterns to restore"
+    required: true
+  key:
+    description: "An explicit key for restoring the cache"
+    required: true
+  fail-on-cache-miss:
+    description: "Fail the workflow if cache entry is not found"
+    default: "false"
+    required: false
+outputs:
+  cache-hit:
+    description: "A boolean value to indicate if cache entry was found and downloaded"
+runs:
+  using: composite
+  steps:
+    - run: $GITHUB_ACTION_PATH/restore/entrypoint.sh
+      shell: bash
+      env:
+        OS: ${{ runner.os }}
+        PATHS: ${{ inputs.paths }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        AWS_REGION: ${{ inputs.aws-region }}
+        AWS_BUCKET: ${{ inputs.aws-bucket }}
+        KEY: ${{ inputs.key }}
+        FAIL_ON_CACHE_MISS: ${{ inputs.fail-on-cache-miss }}
