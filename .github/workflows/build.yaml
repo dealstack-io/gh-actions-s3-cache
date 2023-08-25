@@ -30,7 +30,7 @@ jobs:
       - name: Find version
         id: version
         run: |
-          LAST_TAG=$(git for-each-ref "refs/tags/v*" --sort=-committerdate:relative --format='%(refname)' --count=1 | sed "s/refs\/tags\///" )
+          LAST_TAG=$(git for-each-ref "refs/tags/v*" --sort=committerdate --format='%(refname)' --count=1 | sed "s/refs\/tags\///" )
           
           NEXT_VERSION="v$(npx semver "$LAST_TAG" -i patch -c)"
           
