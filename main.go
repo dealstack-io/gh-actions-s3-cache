@@ -21,9 +21,13 @@ func main() {
 			log.Fatal("No paths provided")
 		}
 
+		log.Printf("Creating ZIP file %s", action.Key)
+
 		if err := CreateZip(action.Key, action.Paths); err != nil {
 			log.Fatal(err)
 		}
+
+		log.Printf("Uploading file %s", action.Key)
 
 		if err := UploadFile(action.Key, action.Bucket); err != nil {
 			log.Fatal(err)
@@ -35,9 +39,13 @@ func main() {
 		}
 
 		if exists {
+			log.Printf("Downloading %s", action.Key)
+
 			if err := DownloadFile(action.Key, action.Bucket); err != nil {
 				log.Fatal(err)
 			}
+
+			log.Printf("Unpacking ZIP file %s", action.Key)
 
 			if err := UnpackZip(action.Key); err != nil {
 				log.Fatal(err)

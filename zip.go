@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -25,7 +26,15 @@ func CreateZip(filename string, paths []string) error {
 		}
 
 		for _, match := range matches {
+			i := 0
+
 			err := filepath.Walk(match, func(path string, info os.FileInfo, err error) error {
+				i += 1
+
+				if i%100 == 0 {
+					log.Print('.')
+				}
+
 				header, err := zip.FileInfoHeader(info)
 				if err != nil {
 					return err
@@ -36,6 +45,20 @@ func CreateZip(filename string, paths []string) error {
 
 				writer, err := archive.CreateHeader(header)
 				if err != nil {
+					return err
+				}
+
+				if info.Mode()&os.ModeSymlink == os.ModeSymlink {
+					linkTarget, err := os.Readlink(path)
+					if err != nil {
+						return err
+					}
+
+					linkTarget = filepath.Join(match, linkTarget)
+					linkTarget = filepath.ToSlash(linkTarget)
+
+					_, err = writer.Write([]byte(linkTarget))
+
 					return err
 				}
 
@@ -74,6 +97,27 @@ func UnpackZip(filename string) error {
 			return err
 		}
 
+		if file.Mode()&os.ModeSymlink == os.ModeSymlink {
+			reader, err := file.Open()
+			if err != nil {
+				return err
+			}
+			defer reader.Close()
+
+			buffer := make([]byte, file.FileInfo().Size())
+			size, err := reader.Read(buffer)
+			if err != nil && err != io.EOF {
+				return err
+			}
+
+			target := string(buffer[:size])
+
+			err = os.Symlink(target, file.Name)
+			if err != nil {
+				return err
+			}
+		}
+
 		if file.FileInfo().IsDir() {
 			continue
 		}
@@ -82,18 +126,17 @@ func UnpackZip(filename string) error {
 		if err != nil {
 			return nil
 		}
+		defer outFile.Close()
 
 		currentFile, err := file.Open()
 		if err != nil {
 			return err
 		}
+		defer currentFile.Close()
 
 		if _, err = io.Copy(outFile, currentFile); err != nil {
 			return err
 		}
-
-		outFile.Close()
-		currentFile.Close()
 	}
 
 	return nil
