@@ -116,9 +116,9 @@ func UnpackZip(filename string) error {
 			if err != nil {
 				return err
 			}
-		}
 
-		if file.FileInfo().IsDir() {
+			continue
+		} else if file.FileInfo().IsDir() {
 			continue
 		}
 
