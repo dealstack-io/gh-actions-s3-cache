@@ -29,10 +29,19 @@ func CreateZip(filename string, paths []string) error {
 			i := 0
 
 			err := filepath.Walk(match, func(path string, info os.FileInfo, err error) error {
+				if i%5000 == 0 {
+					log.Printf("Processed %d files", i)
+				}
+
 				i += 1
 
-				if i%100 == 0 {
-					log.Print('.')
+				relativePath, err := filepath.Rel(match, path)
+				if err != nil {
+					return err
+				}
+
+				if relativePath == "." {
+					return nil
 				}
 
 				header, err := zip.FileInfoHeader(info)
@@ -40,7 +49,7 @@ func CreateZip(filename string, paths []string) error {
 					return err
 				}
 
-				header.Name = path
+				header.Name = relativePath
 				header.Method = zip.Deflate
 
 				writer, err := archive.CreateHeader(header)
@@ -54,8 +63,12 @@ func CreateZip(filename string, paths []string) error {
 						return err
 					}
 
-					linkTarget = filepath.Join(match, linkTarget)
-					linkTarget = filepath.ToSlash(linkTarget)
+					if filepath.IsAbs(linkTarget) {
+						linkTarget, err = filepath.Rel(match, linkTarget)
+						if err != nil {
+							return err
+						}
+					}
 
 					_, err = writer.Write([]byte(linkTarget))
 
@@ -76,6 +89,9 @@ func CreateZip(filename string, paths []string) error {
 
 				return err
 			})
+
+			log.Printf("Processed %d files", i)
+
 			if err != nil {
 				return err
 			}
@@ -85,15 +101,25 @@ func CreateZip(filename string, paths []string) error {
 	return nil
 }
 
-func UnpackZip(filename string) error {
+func UnpackZip(filename, path string) error {
 	reader, err := zip.OpenReader(filename)
 	if err != nil {
 		return err
 	}
 	defer reader.Close()
 
+	i := 0
+
 	for _, file := range reader.File {
-		if err := os.MkdirAll(filepath.Dir(file.Name), os.ModePerm); err != nil {
+		if i%5000 == 0 {
+			log.Printf("Processed %d files", i)
+		}
+
+		i += 1
+
+		filePath := filepath.Join(path, file.Name)
+
+		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
 			return err
 		}
 
@@ -112,7 +138,7 @@ func UnpackZip(filename string) error {
 
 			target := string(buffer[:size])
 
-			err = os.Symlink(target, file.Name)
+			err = os.Symlink(target, filePath)
 			if err != nil {
 				return err
 			}
@@ -122,7 +148,7 @@ func UnpackZip(filename string) error {
 			continue
 		}
 
-		outFile, err := os.OpenFile(file.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+		outFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
 		if err != nil {
 			return nil
 		}
@@ -138,6 +164,8 @@ func UnpackZip(filename string) error {
 			return err
 		}
 	}
+
+	log.Printf("Processed %d files", i)
 
 	return nil
 }

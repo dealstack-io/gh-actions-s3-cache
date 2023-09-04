@@ -33,6 +33,10 @@ func main() {
 			log.Fatal(err)
 		}
 	} else if action.Action == RestoreAction {
+		if len(action.Paths) > 1 {
+			log.Fatal("Too many paths provided for restore function.")
+		}
+
 		exists, err := ObjectExists(action.Key, action.Bucket)
 		if err != nil {
 			log.Fatal(err)
@@ -47,7 +51,7 @@ func main() {
 
 			log.Printf("Unpacking ZIP file %s", action.Key)
 
-			if err := UnpackZip(action.Key); err != nil {
+			if err := UnpackZip(action.Key, action.Paths[0]); err != nil {
 				log.Fatal(err)
 			}
 		} else {
