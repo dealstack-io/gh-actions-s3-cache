@@ -5,6 +5,9 @@ branding:
   icon: archive
   color: gray-dark
 inputs:
+  path:
+    description: "Path where to extract"
+    required: true
   key:
     description: "An explicit key for restoring the cache"
     required: true
@@ -40,6 +43,7 @@ runs:
         AWS_REGION: ${{ inputs.aws-region }}
         AWS_BUCKET: ${{ inputs.aws-bucket }}
         KEY: ${{ inputs.key }}
+        PATHS: ${{ inputs.path }}
         FAIL_ON_CACHE_MISS: ${{ inputs.fail-on-cache-miss }}
     - id: cache-hit
       run: |
